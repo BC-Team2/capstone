@@ -1,18 +1,28 @@
 import subprocess
 
+from main import query_prog
+
 
 def connect_to_targets():
     pass
     # This probably is where a list or a single target is passed to pssh with a command/set of commands to
     # run. Could be used to query version or to apply remediation.
     # Need to decide whether key authentication or pass authentication is going to be used
+    # todo: check whether or not we can successfully connect to machines https://stackoverflow.com/questions/1405324/how-to-create-a-bash-script-to-check-the-ssh-connection
+    # todo: create connections to remote machines to that commands can be passed to the session
 
 
 def install_repo():
     pass  # Do we need to load an internal repo from the client? (RHEL systems)
 
 
+def check_perms():
+    pass
+    # todo: do we have rights to run yum as this user? Parse sudo -l to see if we have rights (or all:all)
+
+
 def query_targets(program):
+    print("Using dpkg to evaluate the installed version of " + query_prog)
     # Get the FQDN for the computer we're running on, send output to pipe
     # Use text=True here or you end up with type "bytes"
     hostname = subprocess.run(["hostname", "-f"],stdout=subprocess.PIPE,text=True)
@@ -29,7 +39,7 @@ def query_targets(program):
     for r in output_firstline:
         query_results.append(r)
     return query_results
-
+    # todo: change this to run over ssh once that module is finished
 
 def remediate_targets():
     pass
