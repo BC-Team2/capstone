@@ -2,10 +2,12 @@
 # Would need to install paramiko
 
 from paramiko import SSHClient, AutoAddPolicy
+# Imports SSH client
 
 hosts = ['10.0.0.1', 
          '10.0.0.2', 
          '10.0.0.3']
+# List of host
 
 for host in hosts:
     client = SSHClient()
@@ -16,9 +18,10 @@ for host in hosts:
     # Looks for keys, loads them for each host
 
     # Run a command
-    stdin, stdout, stderr = client.exec_command('hostname')
+    stdin, stdout, stderr = client.exec_command('uname -a')
 
     if stdout.channel.recv_exit_status() == 0:
+    # Ensure there was no errors
         print(f'STDOUT: {stdout.read().decode("utf8")}')
         # Prints The Standard Output in Human Readable Format
     else:
