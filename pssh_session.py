@@ -1,6 +1,6 @@
 import subprocess
 
-from main import query_prog
+from main import QUERY_PROG
 
 
 def connect_to_targets():
@@ -22,12 +22,12 @@ def check_perms():
 
 
 def query_targets(program):
-    print("Using dpkg to evaluate the installed version of " + query_prog)
+    print("Using dpkg to evaluate the installed version of " + QUERY_PROG)
     # Get the FQDN for the computer we're running on, send output to pipe
     # Use text=True here or you end up with type "bytes"
-    hostname = subprocess.run(["hostname", "-f"],stdout=subprocess.PIPE,text=True)
+    hostname = subprocess.run(["hostname", "-f"], stdout=subprocess.PIPE, text=True)
     # Run a dpkg list, send output to pipe
-    query_results = subprocess.Popen(["dpkg", "-l"], stdout=subprocess.PIPE,text=True)
+    query_results = subprocess.Popen(["dpkg", "-l"], stdout=subprocess.PIPE, text=True)
     # Take stdout and run a grep for our program against it
     output = str(subprocess.check_output(["grep", program], stdin=query_results.stdout))
     query_results.wait()
@@ -39,7 +39,8 @@ def query_targets(program):
     for r in output_firstline:
         query_results.append(r)
     return query_results
-    # todo: change this to run over ssh once that module is finished
+    # todo: change this to run over ssh once that module is finished, unless it's completely different w/ AppDyn
+
 
 def remediate_targets():
     pass
