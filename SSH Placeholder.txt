@@ -4,9 +4,9 @@
 from paramiko import SSHClient, AutoAddPolicy
 # Imports SSH client
 
-hosts = ['10.0.0.1', 
-         '10.0.0.2', 
-         '10.0.0.3']
+hosts = ['10.0.0.101', 
+         '10.0.0.102', 
+         '10.0.0.103']
 # List of host
 
 for host in hosts:
