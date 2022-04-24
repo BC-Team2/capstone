@@ -1,0 +1,31 @@
+pip install paramiko
+
+from paramiko import SSHClient, AutoAddPolicy
+
+hosts = ['10.0.0.1', 
+         '10.0.0.2', 
+         '10.0.0.3']
+
+for host in hosts:
+    client = SSHClient()
+    client.load_host_keys('C:/')
+    client.set_missing_host_key_policy(AutoAddPolicy())
+    client.load_system_host_keys()
+    client.connect(host, username='administrator')
+    # Looks for keys, loads them for each host
+
+    # Run a command
+    stdin, stdout, stderr = client.exec_command('hostname')
+
+    if stdout.channel.recv_exit_status() == 0:
+        print(f'STDOUT: {stdout.read().decode("utf8")}')
+        # Prints The Standard Output in Human Readable Format
+    else:
+        print(f'STDERR: {stderr.read().decode("utf8")}')
+        # Prints The Standard Error (If any) in Human Readable Format
+
+    # Close out the file objects and client itself 
+    stdin.close()
+    stdout.close()
+    stderr.close()
+    client.close()
