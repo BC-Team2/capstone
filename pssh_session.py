@@ -1,16 +1,53 @@
 import subprocess
-
+import sys
+import paramiko
+from paramiko import SSHClient, AutoAddPolicy
 from main import QUERY_PROG
 
 
-def connect_to_targets():
-    pass
-    # This probably is where a list or a single target is passed to pssh with a command/set of commands to
-    # run. Could be used to query version or to apply remediation.
-    # Need to decide whether key authentication or pass authentication is going to be used
-    # todo: check whether or not we can successfully connect to machines https://stackoverflow.com/questions/1405324/how-to-create-a-bash-script-to-check-the-ssh-connection
-    # todo: create connections to remote machines to that commands can be passed to the session
+def connect_to_targets(targets, key):
+    """POC for connecting to a remote machine via ssh and running a command, returning the output to console"""
+    client = SSHClient()
+    # client.load_host_keys(filename=ssh_key)
+    client.set_missing_host_key_policy(AutoAddPolicy)
+    # client.load_system_host_keys()
+    # Iterate through the targets list, connecting and performing an action.
+    # Nested loop because we end up with a list of lists for this function
+    for t in targets:
+        for tar in t:
+            print('Trying ' + tar)
+            try:
+                client.connect(tar, username='jparmrat', key_filename=key)
+            except paramiko.SSHException as e:
+                print(e)
+                print('There was an error connecting to the server (SSH KEY). Exiting')
+                # TODO: in theory, we should be able to keep this from happening, requiring an exit
+                sys.exit(1)
+            # Test command here
+            print("Connected to " + tar + ", running checks")
+            stdin, stdout, stderr = client.exec_command('uname -a')
+            # If everything was fine, print output, otherwise give error from command
+            if stdout.channel.recv_exit_status() == 0:
+                print(f'{stdout.read().decode("utf8")}')
+                # Prints The Standard Output in Human Readable Format
+                # Implement logging feature around here.
+            else:
+                print(f'ERROR: {stderr.read().decode("utf8")}')
+                # Prints The Standard Error (If any) in Human Readable Format
+            # Close out all of these files to clean up
+            stdin.close()
+            stdout.close()
+            stderr.close()
+            client.close()
 
+
+# todo: the command(s) that actually get run should be a separate function. Determine how to pass the existing
+#  session to a function
+# todo: Update code to make sure we can make a connection, and report why (exception text) to
+#  the user. Export this list as a csv since they will get skipped, and the user needs to fix the auth issue and run
+#  them again.
+# todo: longer term - we need to log connection success/fail, and the console output for what happens during version
+#  check and remediation
 
 def install_repo():
     pass  # Do we need to load an internal repo from the client? (RHEL systems)
@@ -22,6 +59,7 @@ def check_perms():
 
 
 def query_targets(program):
+    """Probably deprecated now that we have a POC for paramiko"""
     print("Using dpkg to evaluate the installed version of " + QUERY_PROG)
     # Get the FQDN for the computer we're running on, send output to pipe
     # Use text=True here or you end up with type "bytes"

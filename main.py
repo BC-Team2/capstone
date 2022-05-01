@@ -5,6 +5,7 @@ import pssh_session
 import argparse
 import os
 import csv
+import time
 
 # This is the version that is not vulnerable, per
 # https://docs.appdynamics.com/display/PAA/Security+Advisory%3A+Apache+Log4j+Vulnerability
@@ -19,6 +20,8 @@ parser = argparse.ArgumentParser()
 # -t is mandatory
 parser.add_argument('-t', '--targets', type=str, required=True,
                     help='The location of the CSV containing targets to evaluate')
+parser.add_argument('-i', '--key', type=str, required=True,
+                    help='The FULL path to the SSH private key for a user with sufficient privileges')
 # If '-c' is used, it will return true (user is running script in check ONLY mode)
 parser.add_argument('-c', '--check', action='store_true', help='The program to evaluate for vulnerability')
 # Parse arguments
@@ -47,13 +50,17 @@ if __name__ == '__main__':
     # If check only is on, says so
     if args.check:
         print("Running in check ONLY mode\n")
-    print('Loading targets from csv...')
+    print('Loading targets from ' + args.targets + '...')
     # Get the list of clients to work on
     target_list = get_targets()
+    # 5 second safety net before we touch any systems
+    print('Waiting 5 seconds before connecting to systems. Ctrl+c to break')
+    time.sleep(5)
+    pssh_session.connect_to_targets(target_list, args.key)
     # Debug code - prints the list of clients
-    for i in target_list:
-        print(i)
+    # for i in target_list:
+    #     print(i)
     ###
     # TODO: The 'get version' code is probably going to change once we run multiple machines
-    version = pssh_session.query_targets(QUERY_PROG)  # Get hostname/version for a computer
-    print(version)  # Debug print
+    # version = pssh_session.query_targets(QUERY_PROG)  # Get hostname/version for a computer
+    # print(version)  # Debug print
