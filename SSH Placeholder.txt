@@ -24,6 +24,7 @@ for host in hosts:
     # Ensure there was no errors
         print(f'STDOUT: {stdout.read().decode("utf8")}')
         # Prints The Standard Output in Human Readable Format
+        # Impliment logging feature around here. 
     else:
         print(f'STDERR: {stderr.read().decode("utf8")}')
         # Prints The Standard Error (If any) in Human Readable Format
