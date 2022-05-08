@@ -1,7 +1,10 @@
+import re
 import subprocess
 import sys
 import paramiko
 from paramiko import SSHClient, AutoAddPolicy
+
+import main
 from main import QUERY_PROG
 
 
@@ -23,12 +26,23 @@ def connect_to_targets(targets, key):
                 print('There was an error connecting to the server (SSH KEY). Exiting')
                 # TODO: in theory, we should be able to keep this from happening, requiring an exit
                 sys.exit(1)
-            # Test command here
+            # If we connected successfully, proceed to evaluate the program version and report findings via console
             print("Connected to " + tar + ", running checks")
-            stdin, stdout, stderr = client.exec_command('uname -a')
-            # If everything was fine, print output, otherwise give error from command
+            # Check installed RPMs. Grep for the program we're looking for
+            stdin, stdout, stderr = client.exec_command('rpm -qa | grep ' + main.QUERY_PROG)
             if stdout.channel.recv_exit_status() == 0:
-                print(f'{stdout.read().decode("utf8")}')
+                rpm_output = stdout.read().decode("utf8")
+                # If that output is not blank (we found it)
+                if rpm_output != '':
+                    print('Found: ' + rpm_output)
+                    # Regex to get the version number from the package listing
+                    app_ver_re = re.search("appdynamics-machine-agent-(.*).x", rpm_output)
+                    app_version = app_ver_re.group(1)
+                    # Call function to evaluate whether this version is vulnerable
+                    vuln_status = eval_version(app_version)
+                    print(vuln_status)
+                else:
+                    print('Client not found')
                 # Prints The Standard Output in Human Readable Format
                 # Implement logging feature around here.
             else:
@@ -39,6 +53,22 @@ def connect_to_targets(targets, key):
             stdout.close()
             stderr.close()
             client.close()
+
+
+def eval_version(ver):
+    """Function that breaks down version numbers, separated by periods. Evaluates to three places"""
+    check_ver = re.search("(\d*).(\d*).(\d*).(\d*)", ver)
+    nonvuln_split = main.NON_VULNERABLE_VERSION.split('.')
+    # Sees if each section of the version number (major, sub version, etc.) is less than the nonvulnerable version, left
+    # to right, in sequence. We assume that if any place is less than the non-vulnerable version, the installed
+    # version is inferior and needs to be updated. Ex. 21.10 fails this check, and no further
+    # eval is needed
+    if int(check_ver.group(1)) < int(nonvuln_split[0]):
+        if int(check_ver.group(2)) < int(nonvuln_split[1]):
+            if int(check_ver.group(3)) < int(nonvuln_split[2]):
+                return 'Version is vulnerable'
+    else:
+        return 'Version not vulnerable'
 
 
 # todo: the command(s) that actually get run should be a separate function. Determine how to pass the existing

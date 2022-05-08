@@ -12,7 +12,7 @@ import time
 # We should update any client that is LESS THAN this version number
 NON_VULNERABLE_VERSION = '21.11.2'
 # Program to run (of which we want the version number for)
-QUERY_PROG = "vim"
+QUERY_PROG = "appdynamics-machine-agent"
 
 # Create parser (argparse)
 parser = argparse.ArgumentParser()
@@ -50,6 +50,7 @@ if __name__ == '__main__':
     # If check only is on, says so
     if args.check:
         print("Running in check ONLY mode\n")
+    print('Evaluating for ' + QUERY_PROG + ' greater than or equal to version ' + NON_VULNERABLE_VERSION)
     print('Loading targets from ' + args.targets + '...')
     # Get the list of clients to work on
     target_list = get_targets()
