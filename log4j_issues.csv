@@ -1,0 +1,7 @@
+Vendor,version at risk,upgrade to,Vulrnablities,Level,Detail
+Apache,['1.x'],2,Apache Log4j 1.x JMSSink deserialization,medium,
+Apache,"['2.0', '2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8', '2.9', '2.10', '2.11', '2.12', '2.13', '2.14', '2.15', '2.16', '2.17']","['2.3.2', '2.12.4', '2.17.1']",Apache Log4j up to 2.17.0 Logging Configuration File injection,medium,
+Apache,"['2.0', '2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8', '2.9', '2.10', '2.11', '2.12', '2.12.0', '2.12.1', '2.12.2', '2.13', '2.14', '2.15', '2.16']","['2.12.3', '2.17.0']",Apache Log4j up to 2.12.2/2.16.0 Lookup infinite loop,low,
+Apache,['2.15.0'],2.16.0,Apache Log4j 2.15.0 Incomplete Fix CVE-2021-44228 deserialization,medium,
+Apache,['1.2'],2,Apache Log4j 1.2 JMSAppender deserialization,medium,
+Apache,"['2.14.0', '2.14.1']",2.15.0,Apache log4j up to 2.14.1 JNDI LDAP Server Lookup Log4Shell/LogJam deserialization,high,
