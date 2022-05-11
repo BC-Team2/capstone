@@ -63,12 +63,15 @@ def eval_version(ver):
     # to right, in sequence. We assume that if any place is less than the non-vulnerable version, the installed
     # version is inferior and needs to be updated. Ex. 21.10 fails this check, and no further
     # eval is needed
-    if int(check_ver.group(1)) < int(nonvuln_split[0]):
-        if int(check_ver.group(2)) < int(nonvuln_split[1]):
-            if int(check_ver.group(3)) < int(nonvuln_split[2]):
-                return 'Version is vulnerable'
-    else:
+    if int(check_ver.group(1)) >= int(nonvuln_split[0]):
         return 'Version not vulnerable'
+    elif int(check_ver.group(1)) == int(nonvuln_split[0]) and (int(check_ver.group(1)) >= int(nonvuln_split[0])):
+        return 'Version not vulnerable'
+    elif int(check_ver.group(1)) == int(nonvuln_split[0]) and (int(check_ver.group(1)) >= int(nonvuln_split[0])) and \
+            (int(check_ver.group(2)) >= int(nonvuln_split[1])):
+        return 'Version not vulnerable'
+    else:
+        return 'Version VULNERABLE'
 
 
 # todo: the command(s) that actually get run should be a separate function. Determine how to pass the existing
@@ -78,6 +81,7 @@ def eval_version(ver):
 #  them again.
 # todo: longer term - we need to log connection success/fail, and the console output for what happens during version
 #  check and remediation
+
 
 def install_repo():
     pass  # Do we need to load an internal repo from the client? (RHEL systems)
