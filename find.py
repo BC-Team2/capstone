@@ -25,7 +25,7 @@ else:
 
 #2) take the output of the log4js file and parse it so it you can the csv
 
-#3) check the log4js to the csv file
+#3) check the log4js to the csv file - this portion needs to check both sides and to use wild cards - such as 2.17.* is at risk if it was 2.17 but not 2.17.1
 
 #4) if there is a error found you have to notify the user running the script and to append to a csv the name of the server and the log4j error they have/what version they need to upgrade to
 ~                                                                                                                                                                                                  
