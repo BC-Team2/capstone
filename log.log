@@ -1,0 +1,100 @@
+2022-05-26 20:16:38,093:INFO:root:Trying to load target list from targets.csv
+2022-05-26 20:16:38,093:INFO:root:Targets loaded from targets.csv
+2022-05-26 20:16:43,094:INFO:root:Trying to connect to 34.168.4.65
+2022-05-26 20:16:50,643:DEBUG:paramiko.transport:starting thread (client mode): 0xc21bd9d0
+2022-05-26 20:16:50,643:DEBUG:paramiko.transport:Local version/idstring: SSH-2.0-paramiko_2.10.4
+2022-05-26 20:16:50,729:DEBUG:paramiko.transport:Remote version/idstring: SSH-2.0-OpenSSH_8.0
+2022-05-26 20:16:50,729:INFO:paramiko.transport:Connected (version 2.0, client OpenSSH_8.0)
+2022-05-26 20:16:50,779:DEBUG:paramiko.transport:=== Key exchange possibilities ===
+2022-05-26 20:16:50,779:DEBUG:paramiko.transport:kex algos: curve25519-sha256, curve25519-sha256@libssh.org, ecdh-sha2-nistp256, ecdh-sha2-nistp384, ecdh-sha2-nistp521, diffie-hellman-group-exchange-sha256, diffie-hellman-group14-sha256, diffie-hellman-group16-sha512, diffie-hellman-group18-sha512, diffie-hellman-group-exchange-sha1, diffie-hellman-group14-sha1
+2022-05-26 20:16:50,779:DEBUG:paramiko.transport:server key: rsa-sha2-512, rsa-sha2-256, ssh-rsa, ecdsa-sha2-nistp256, ssh-ed25519
+2022-05-26 20:16:50,780:DEBUG:paramiko.transport:client encrypt: aes256-gcm@openssh.com, chacha20-poly1305@openssh.com, aes256-ctr, aes256-cbc, aes128-gcm@openssh.com, aes128-ctr, aes128-cbc
+2022-05-26 20:16:50,780:DEBUG:paramiko.transport:server encrypt: aes256-gcm@openssh.com, chacha20-poly1305@openssh.com, aes256-ctr, aes256-cbc, aes128-gcm@openssh.com, aes128-ctr, aes128-cbc
+2022-05-26 20:16:50,781:DEBUG:paramiko.transport:client mac: hmac-sha2-256-etm@openssh.com, hmac-sha1-etm@openssh.com, umac-128-etm@openssh.com, hmac-sha2-512-etm@openssh.com, hmac-sha2-256, hmac-sha1, umac-128@openssh.com, hmac-sha2-512
+2022-05-26 20:16:50,781:DEBUG:paramiko.transport:server mac: hmac-sha2-256-etm@openssh.com, hmac-sha1-etm@openssh.com, umac-128-etm@openssh.com, hmac-sha2-512-etm@openssh.com, hmac-sha2-256, hmac-sha1, umac-128@openssh.com, hmac-sha2-512
+2022-05-26 20:16:50,781:DEBUG:paramiko.transport:client compress: none, zlib@openssh.com
+2022-05-26 20:16:50,781:DEBUG:paramiko.transport:server compress: none, zlib@openssh.com
+2022-05-26 20:16:50,781:DEBUG:paramiko.transport:client lang: <none>
+2022-05-26 20:16:50,781:DEBUG:paramiko.transport:server lang: <none>
+2022-05-26 20:16:50,781:DEBUG:paramiko.transport:kex follows: False
+2022-05-26 20:16:50,782:DEBUG:paramiko.transport:=== Key exchange agreements ===
+2022-05-26 20:16:50,782:DEBUG:paramiko.transport:Kex: curve25519-sha256@libssh.org
+2022-05-26 20:16:50,782:DEBUG:paramiko.transport:HostKey: ssh-ed25519
+2022-05-26 20:16:50,782:DEBUG:paramiko.transport:Cipher: aes128-ctr
+2022-05-26 20:16:50,782:DEBUG:paramiko.transport:MAC: hmac-sha2-256
+2022-05-26 20:16:50,782:DEBUG:paramiko.transport:Compression: none
+2022-05-26 20:16:50,782:DEBUG:paramiko.transport:=== End of kex handshake ===
+2022-05-26 20:16:50,803:DEBUG:paramiko.transport:kex engine KexCurve25519 specified hash_algo <built-in function openssl_sha256>
+2022-05-26 20:16:50,803:DEBUG:paramiko.transport:Switch to new keys ...
+2022-05-26 20:16:50,803:DEBUG:paramiko.transport:Adding ssh-ed25519 host key for 34.168.4.65: b'c5a7637aa562fc109df324e7fd47abcf'
+2022-05-26 20:16:50,804:DEBUG:paramiko.transport:Got EXT_INFO: {'server-sig-algs': b'ssh-ed25519,ssh-rsa,rsa-sha2-256,rsa-sha2-512,ssh-dss,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521'}
+2022-05-26 20:16:50,804:DEBUG:paramiko.transport:Trying discovered key b'35accc9d8592ec24027a240c01192a51' in /home/josh/.ssh/gcp_capstone
+2022-05-26 20:16:50,861:DEBUG:paramiko.transport:userauth is OK
+2022-05-26 20:16:50,861:DEBUG:paramiko.transport:Finalizing pubkey algorithm for key of type 'ssh-rsa'
+2022-05-26 20:16:50,861:DEBUG:paramiko.transport:Our pubkey algorithm list: ['rsa-sha2-512', 'rsa-sha2-256', 'ssh-rsa']
+2022-05-26 20:16:50,861:DEBUG:paramiko.transport:Server-side algorithm list: ['ssh-ed25519', 'ssh-rsa', 'rsa-sha2-256', 'rsa-sha2-512', 'ssh-dss', 'ecdsa-sha2-nistp256', 'ecdsa-sha2-nistp384', 'ecdsa-sha2-nistp521']
+2022-05-26 20:16:50,861:DEBUG:paramiko.transport:Agreed upon 'rsa-sha2-512' pubkey algorithm
+2022-05-26 20:16:51,385:INFO:paramiko.transport:Authentication (publickey) successful!
+2022-05-26 20:16:51,385:INFO:root:Connected to 34.168.4.65
+2022-05-26 20:16:51,386:DEBUG:paramiko.transport:[chan 0] Max packet in: 32768 bytes
+2022-05-26 20:16:52,131:DEBUG:paramiko.transport:Received global request "hostkeys-00@openssh.com"
+2022-05-26 20:16:52,132:DEBUG:paramiko.transport:Rejecting "hostkeys-00@openssh.com" global request from server.
+2022-05-26 20:16:52,132:DEBUG:paramiko.transport:Debug msg: b'/home/jparmrat/.ssh/authorized_keys:2: key options: agent-forwarding port-forwarding pty user-rc x11-forwarding'
+2022-05-26 20:16:52,189:DEBUG:paramiko.transport:[chan 0] Max packet out: 32768 bytes
+2022-05-26 20:16:52,189:DEBUG:paramiko.transport:Secsh channel 0 opened.
+2022-05-26 20:16:52,271:DEBUG:paramiko.transport:[chan 0] Sesch channel 0 request ok
+2022-05-26 20:18:21,176:DEBUG:paramiko.transport:[chan 0] EOF received (0)
+2022-05-26 20:18:21,176:INFO:root:For 34.168.4.65 found appdynamics-machine-agent-22.4.0.3344-1.x86_64
+
+2022-05-26 20:18:21,177:DEBUG:paramiko.transport:[chan 0] EOF sent (0)
+2022-05-26 20:18:21,178:INFO:root:34.168.4.65 is Version not vulnerable
+2022-05-26 20:18:21,178:DEBUG:paramiko.transport:EOF in transport thread
+2022-05-26 20:18:21,179:INFO:root:Trying to connect to 34.83.21.129
+2022-05-26 20:18:42,222:ERROR:root:34.83.21.129 is not reachable --- [Errno 11] Resource temporarily unavailable
+2022-05-26 20:18:42,224:INFO:root:Trying to connect to 34.168.4.65
+2022-05-26 20:18:42,400:DEBUG:paramiko.transport:starting thread (client mode): 0xc2164b50
+2022-05-26 20:18:42,401:DEBUG:paramiko.transport:Local version/idstring: SSH-2.0-paramiko_2.10.4
+2022-05-26 20:18:43,155:DEBUG:paramiko.transport:Remote version/idstring: SSH-2.0-OpenSSH_8.0
+2022-05-26 20:18:43,156:INFO:paramiko.transport:Connected (version 2.0, client OpenSSH_8.0)
+2022-05-26 20:18:43,167:DEBUG:paramiko.transport:=== Key exchange possibilities ===
+2022-05-26 20:18:43,167:DEBUG:paramiko.transport:kex algos: curve25519-sha256, curve25519-sha256@libssh.org, ecdh-sha2-nistp256, ecdh-sha2-nistp384, ecdh-sha2-nistp521, diffie-hellman-group-exchange-sha256, diffie-hellman-group14-sha256, diffie-hellman-group16-sha512, diffie-hellman-group18-sha512, diffie-hellman-group-exchange-sha1, diffie-hellman-group14-sha1
+2022-05-26 20:18:43,167:DEBUG:paramiko.transport:server key: rsa-sha2-512, rsa-sha2-256, ssh-rsa, ecdsa-sha2-nistp256, ssh-ed25519
+2022-05-26 20:18:43,167:DEBUG:paramiko.transport:client encrypt: aes256-gcm@openssh.com, chacha20-poly1305@openssh.com, aes256-ctr, aes256-cbc, aes128-gcm@openssh.com, aes128-ctr, aes128-cbc
+2022-05-26 20:18:43,167:DEBUG:paramiko.transport:server encrypt: aes256-gcm@openssh.com, chacha20-poly1305@openssh.com, aes256-ctr, aes256-cbc, aes128-gcm@openssh.com, aes128-ctr, aes128-cbc
+2022-05-26 20:18:43,167:DEBUG:paramiko.transport:client mac: hmac-sha2-256-etm@openssh.com, hmac-sha1-etm@openssh.com, umac-128-etm@openssh.com, hmac-sha2-512-etm@openssh.com, hmac-sha2-256, hmac-sha1, umac-128@openssh.com, hmac-sha2-512
+2022-05-26 20:18:43,167:DEBUG:paramiko.transport:server mac: hmac-sha2-256-etm@openssh.com, hmac-sha1-etm@openssh.com, umac-128-etm@openssh.com, hmac-sha2-512-etm@openssh.com, hmac-sha2-256, hmac-sha1, umac-128@openssh.com, hmac-sha2-512
+2022-05-26 20:18:43,168:DEBUG:paramiko.transport:client compress: none, zlib@openssh.com
+2022-05-26 20:18:43,168:DEBUG:paramiko.transport:server compress: none, zlib@openssh.com
+2022-05-26 20:18:43,168:DEBUG:paramiko.transport:client lang: <none>
+2022-05-26 20:18:43,168:DEBUG:paramiko.transport:server lang: <none>
+2022-05-26 20:18:43,168:DEBUG:paramiko.transport:kex follows: False
+2022-05-26 20:18:43,168:DEBUG:paramiko.transport:=== Key exchange agreements ===
+2022-05-26 20:18:43,168:DEBUG:paramiko.transport:Kex: curve25519-sha256@libssh.org
+2022-05-26 20:18:43,168:DEBUG:paramiko.transport:HostKey: ssh-ed25519
+2022-05-26 20:18:43,168:DEBUG:paramiko.transport:Cipher: aes128-ctr
+2022-05-26 20:18:43,168:DEBUG:paramiko.transport:MAC: hmac-sha2-256
+2022-05-26 20:18:43,168:DEBUG:paramiko.transport:Compression: none
+2022-05-26 20:18:43,168:DEBUG:paramiko.transport:=== End of kex handshake ===
+2022-05-26 20:18:43,411:DEBUG:paramiko.transport:kex engine KexCurve25519 specified hash_algo <built-in function openssl_sha256>
+2022-05-26 20:18:43,411:DEBUG:paramiko.transport:Switch to new keys ...
+2022-05-26 20:18:43,412:DEBUG:paramiko.transport:Got EXT_INFO: {'server-sig-algs': b'ssh-ed25519,ssh-rsa,rsa-sha2-256,rsa-sha2-512,ssh-dss,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521'}
+2022-05-26 20:18:43,413:DEBUG:paramiko.transport:Trying discovered key b'35accc9d8592ec24027a240c01192a51' in /home/josh/.ssh/gcp_capstone
+2022-05-26 20:18:43,427:DEBUG:paramiko.transport:userauth is OK
+2022-05-26 20:18:43,427:DEBUG:paramiko.transport:Finalizing pubkey algorithm for key of type 'ssh-rsa'
+2022-05-26 20:18:43,427:DEBUG:paramiko.transport:Our pubkey algorithm list: ['rsa-sha2-512', 'rsa-sha2-256', 'ssh-rsa']
+2022-05-26 20:18:43,427:DEBUG:paramiko.transport:Server-side algorithm list: ['ssh-ed25519', 'ssh-rsa', 'rsa-sha2-256', 'rsa-sha2-512', 'ssh-dss', 'ecdsa-sha2-nistp256', 'ecdsa-sha2-nistp384', 'ecdsa-sha2-nistp521']
+2022-05-26 20:18:43,427:DEBUG:paramiko.transport:Agreed upon 'rsa-sha2-512' pubkey algorithm
+2022-05-26 20:18:44,672:INFO:paramiko.transport:Authentication (publickey) successful!
+2022-05-26 20:18:44,672:INFO:root:Connected to 34.168.4.65
+2022-05-26 20:18:44,673:DEBUG:paramiko.transport:[chan 0] Max packet in: 32768 bytes
+2022-05-26 20:18:45,674:DEBUG:paramiko.transport:Received global request "hostkeys-00@openssh.com"
+2022-05-26 20:18:45,675:DEBUG:paramiko.transport:Rejecting "hostkeys-00@openssh.com" global request from server.
+2022-05-26 20:18:45,675:DEBUG:paramiko.transport:Debug msg: b'/home/jparmrat/.ssh/authorized_keys:2: key options: agent-forwarding port-forwarding pty user-rc x11-forwarding'
+2022-05-26 20:18:45,900:DEBUG:paramiko.transport:[chan 0] Max packet out: 32768 bytes
+2022-05-26 20:18:45,900:DEBUG:paramiko.transport:Secsh channel 0 opened.
+2022-05-26 20:18:46,163:DEBUG:paramiko.transport:[chan 0] Sesch channel 0 request ok
+2022-05-26 20:19:24,909:DEBUG:paramiko.transport:[chan 0] EOF received (0)
+2022-05-26 20:19:24,909:INFO:root:For 34.168.4.65 found appdynamics-machine-agent-22.4.0.3344-1.x86_64
+
+2022-05-26 20:19:24,909:DEBUG:paramiko.transport:[chan 0] EOF sent (0)
+2022-05-26 20:19:24,910:INFO:root:34.168.4.65 is Version not vulnerable

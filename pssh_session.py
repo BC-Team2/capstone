@@ -3,51 +3,75 @@ import subprocess
 import sys
 import paramiko
 from paramiko import SSHClient, AutoAddPolicy
+import adcheck
+from adcheck import QUERY_PROG
 
-import main
-from main import QUERY_PROG
 
-
-def connect_to_targets(targets, key):
-    """POC for connecting to a remote machine via ssh and running a command, returning the output to console"""
+def get_vulnerability_status_ssh(targets, key):
+    """Connect to a list of remote machines via ssh. Parse out the version number of the App Dynamics machine client
+    and determine whether it is vulnerable per the company's documentation. Provide output to console and logging."""
+    machine_status = []
     client = SSHClient()
     # client.load_host_keys(filename=ssh_key)
     client.set_missing_host_key_policy(AutoAddPolicy)
     # client.load_system_host_keys()
-    # Iterate through the targets list, connecting and performing an action.
+    # Iterate through the targets list and connect to them.
     # Nested loop because we end up with a list of lists for this function
     for t in targets:
         for tar in t:
+            print('----------------------')
             print('Trying ' + tar)
-            try:
+            try:  # Connect to clients
+                adcheck.logger.info(f'Trying to connect to {tar}')
                 client.connect(tar, username='jparmrat', key_filename=key)
+                # TODO: Either remove the username param altogether and assume user names match, or add a switch.
             except paramiko.SSHException as e:
+                # If we can't connect, put results in the list and log.
+                adcheck.logger.error(f'Failed to connect to {tar} --- {e}')
+                machine_status.append([tar, 'Connection failed'])
                 print(e)
                 print('There was an error connecting to the server (SSH KEY). Exiting')
-                # TODO: in theory, we should be able to keep this from happening, requiring an exit
-                sys.exit(1)
+                continue  # If the connection process blows up, log, append results and move on
+            except BlockingIOError as b:
+                adcheck.logger.error(f'{tar} is not reachable --- {b}')
+                machine_status.append([tar, 'Connection failed'])
+                print(f'It looks like {tar} is not reachable. Skipping')
+                continue  # If the connection process blows up, log, append results and move on
+
             # If we connected successfully, proceed to evaluate the program version and report findings via console
+            adcheck.logger.info(f'Connected to {tar}')
             print("Connected to " + tar + ", running checks")
             # Check installed RPMs. Grep for the program we're looking for
-            stdin, stdout, stderr = client.exec_command('rpm -qa | grep ' + main.QUERY_PROG)
+            stdin, stdout, stderr = client.exec_command('rpm -qa | grep ' + adcheck.QUERY_PROG)
             if stdout.channel.recv_exit_status() == 0:
                 rpm_output = stdout.read().decode("utf8")
                 # If that output is not blank (we found it)
-                if rpm_output != '':
+                if len(rpm_output) > 0:
+                    adcheck.logger.info(f'For {tar} found {rpm_output}')
                     print('Found: ' + rpm_output)
                     # Regex to get the version number from the package listing
                     app_ver_re = re.search("appdynamics-machine-agent-(.*).x", rpm_output)
                     app_version = app_ver_re.group(1)
-                    # Call function to evaluate whether this version is vulnerable
+                    # Call a function to evaluate whether this version is vulnerable
                     vuln_status = eval_version(app_version)
+                    adcheck.logger.info(f'{tar} is {vuln_status}')
+                    # Add these results to the master results list.
+                    machine_status.append([tar, app_version, vuln_status])
                     print(vuln_status)
                 else:
+                    adcheck.logger.error(f'Client not found on {tar}')
+                    machine_status.append([tar, 'Client not found'])
                     print('Client not found')
-                # Prints The Standard Output in Human Readable Format
-                # Implement logging feature around here.
+            # If grepping the package fails, note that happened and move on. Likely not installed.
+            elif stdout.channel.recv_exit_status() == 1:
+                adcheck.logger.error(f'Error code 1 received when searching for app dynamics on {tar}. Is it '
+                                     f'installed here? {stderr.read().decode("utf8")}')
+                machine_status.append([tar, 'Failed to process app version. Is it installed?'])
+                print(f'App Dynamics not found. Is it installed here? {stderr.read().decode("utf8")}')
             else:
+                adcheck.logger.error(f'Nonspecific error encountered on {tar} {stderr.read().decode("utf8")}')
+                machine_status.append([tar, 'Error'])
                 print(f'ERROR: {stderr.read().decode("utf8")}')
-                # Prints The Standard Error (If any) in Human Readable Format
             # Close out all of these files to clean up
             stdin.close()
             stdout.close()
@@ -56,9 +80,9 @@ def connect_to_targets(targets, key):
 
 
 def eval_version(ver):
-    """Function that breaks down version numbers, separated by periods. Evaluates to three places"""
+    """Function that breaks down version numbers, which are separated by periods. Evaluates to three places"""
     check_ver = re.search("(\d*).(\d*).(\d*).(\d*)", ver)
-    nonvuln_split = main.NON_VULNERABLE_VERSION.split('.')
+    nonvuln_split = adcheck.NON_VULNERABLE_VERSION.split('.')
     # Sees if each section of the version number (major, sub version, etc.) is less than the nonvulnerable version, left
     # to right, in sequence. We assume that if any place is less than the non-vulnerable version, the installed
     # version is inferior and needs to be updated. Ex. 21.10 fails this check, and no further
@@ -107,7 +131,7 @@ def query_targets(program):
     output_firstline = output.split()[1:3]
     # Create a list, starting with the hostname
     query_results = [hostname.stdout.split()[0]]
-    # Append program and version number to list. Return list to main
+    # Append program and version number to list. Return list to adcheck
     for r in output_firstline:
         query_results.append(r)
     return query_results

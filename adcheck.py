@@ -2,6 +2,7 @@
 # REQUIRES python v3.8 or greater (tested on 3.8.10)
 # Designed to work against RHEL target systems
 import pssh_session
+import logging
 import argparse
 import os
 import csv
@@ -27,6 +28,15 @@ parser.add_argument('-c', '--check', action='store_true', help='The program to e
 # Parse arguments
 args = parser.parse_args()
 
+# Create and configure logger
+logging.basicConfig(filename="log.log", format='%(asctime)s:%(levelname)s:%(name)s:%(message)s', filemode='w')
+
+# Creating an object
+logger = logging.getLogger()
+
+# Setting the threshold of logger to DEBUG
+logger.setLevel(logging.DEBUG)
+
 
 def get_targets():
     """Pulls the target list out of the csv supplied at program start and returns a list"""
@@ -50,14 +60,17 @@ if __name__ == '__main__':
     # If check only is on, says so
     if args.check:
         print("Running in check ONLY mode\n")
+        logger.info(f'Evaluating for  {QUERY_PROG}  greater than or equal to version {NON_VULNERABLE_VERSION}')
     print('Evaluating for ' + QUERY_PROG + ' greater than or equal to version ' + NON_VULNERABLE_VERSION)
     print('Loading targets from ' + args.targets + '...')
     # Get the list of clients to work on
+    logger.info(f'Trying to load target list from {args.targets}')
     target_list = get_targets()
+    logger.info(f'Targets loaded from {args.targets}')
     # 5 second safety net before we touch any systems
     print('Waiting 5 seconds before connecting to systems. Ctrl+c to break')
     time.sleep(5)
-    pssh_session.connect_to_targets(target_list, args.key)
+    pssh_session.get_vulnerability_status_ssh(target_list, args.key)
     # Debug code - prints the list of clients
     # for i in target_list:
     #     print(i)
