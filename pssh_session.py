@@ -5,6 +5,7 @@ import paramiko
 from paramiko import SSHClient, AutoAddPolicy
 import adcheck
 from adcheck import QUERY_PROG
+import find
 
 
 def get_vulnerability_status_ssh(targets, key):
@@ -37,7 +38,8 @@ def get_vulnerability_status_ssh(targets, key):
                 machine_status.append([tar, 'Connection failed'])
                 print(f'It looks like {tar} is not reachable. Skipping')
                 continue  # If the connection process blows up, log, append results and move on
-
+            # Call find.py's functions
+            log4j_vuln_status = find.check(client)
             # If we connected successfully, proceed to evaluate the program version and report findings via console
             adcheck.logger.info(f'Connected to {tar}')
             print("Connected to " + tar + ", running checks")
@@ -78,6 +80,13 @@ def get_vulnerability_status_ssh(targets, key):
             stderr.close()
             client.close()
 
+def pass_test(connection):
+    print('running pass test')
+    stdin, stdout, stderr = connection.exec_command('pwd')
+    print(stdout.read().decode("utf8"))
+    stdin.close()
+    stdout.close()
+    stderr.close()
 
 def eval_version(ver):
     """Function that breaks down version numbers, which are separated by periods. Evaluates to three places"""

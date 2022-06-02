@@ -1,30 +1,44 @@
 #! /usr/bin/python3
 #jschump
 import subprocess, re, csv
+import paramiko
+
+APP_DYN_PATH = '/opt/appdynamics/'
 
 
 #1) come up with a way to find if the machine is running appdynamis, check services then location. If neither show up end script
-def check():
-    lscheck1 = subprocess.run(['ls', '/opt/appdynamics/machine-agent/'])
-    if lscheck1.returncode == 0:
-        find_core = subprocess.run(['find', '/opt/', '-name', 'log4j-core*'], stdout=subprocess.PIPE).stdout.splitlines()
-#print(find_core)
-        find_api = subprocess.run(['find', '/opt/', '-name', 'log4j-*'], stdout=subprocess.PIPE).stdout.splitlines()
-        for x in find_core:
-            x = str(x)
-            check_ver = re.search("-[0-9]+.(\d*).(\d*)", x)
-            check = str(check_ver.group(0))
-            output = (check[1:])
-            #print(output)
-            output = '2.14.1'
-            verify(output)
+def check(client):
+    lscheck1 = stdin, stdout, stderr = client.exec_command('ls /opt/appdynamics/machine-agent/')
+    lscheck2 = stdout.read().decode('utf8')
+    # TODO: Error checking for abnormal ls results
+    # if lscheck1.returncode == 0:
+    #     find_core = subprocess.run(['find', '/opt/', '-name', 'log4j-core*'], stdout=subprocess.PIPE).stdout.splitlines()
+    core_results = stdin, stdout, stderr = client.exec_command('find ' + APP_DYN_PATH + ' -name "log4j-core*"')
+    core_results_decoded = stdout.read().decode('utf8')
+    print(type(lscheck2))
+    print(lscheck2)
+    print(type(core_results_decoded))
+    print(core_results_decoded)
+
+    #print(find_core)
+        # find_api = subprocess.run(['find', '/opt/', '-name', 'log4j-*'], stdout=subprocess.PIPE).stdout.splitlines()
+    print(type(core_results_decoded))
+
+    if re.search("-([0-9]+).(\d*).(\d*)", core_results_decoded):
+        check_ver = re.search("-([0-9]+).(\d*).(\d*)", core_results_decoded)
+        check = check_ver.group(0)
+        output = (check[1:])
+        #print(output)
+        # output = '2.14.1'
+        verify(output)
     else:
         print('no appdynamics found')
-        exit
 #2) take the output of the log4js file and parse it so it you can the csv
 #3) check the log4js to the csv file - this portion needs to check both sides and to use wild cards - such as 2.17.* is at risk if it was 2.17 but not 2.17.1
 def verify(output):
-    with open('/home/jschump/test.csv', 'r') as testfile:
+    #debug text
+    print('entered verify')
+    with open('log4j_issues.csv', 'r') as testfile:
         read = csv.reader(testfile, delimiter=',')
     # reading csv
         for row in read:
@@ -51,7 +65,7 @@ def verify(output):
         #            print('at risk')
         #        else:
         #            print("no issues found")
-check()
+# check()
 
 #4) if there is a error found you have to notify the user running the script and to append to a csv the name of the server and the log4j error they have/what version they need to upgrade to
 
