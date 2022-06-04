@@ -15,22 +15,22 @@ def check(client):
     #     find_core = subprocess.run(['find', '/opt/', '-name', 'log4j-core*'], stdout=subprocess.PIPE).stdout.splitlines()
     core_results = stdin, stdout, stderr = client.exec_command('find ' + APP_DYN_PATH + ' -name "log4j-core*"')
     core_results_decoded = stdout.read().decode('utf8')
-    print(type(lscheck2))
-    print(lscheck2)
-    print(type(core_results_decoded))
-    print(core_results_decoded)
+    #print(type(lscheck2))
+    #print(lscheck2)
+    #print(type(core_results_decoded))
+    #print(core_results_decoded)
 
     #print(find_core)
         # find_api = subprocess.run(['find', '/opt/', '-name', 'log4j-*'], stdout=subprocess.PIPE).stdout.splitlines()
-    print(type(core_results_decoded))
+    #print(type(core_results_decoded))
 
     if re.search("-([0-9]+).(\d*).(\d*)", core_results_decoded):
         check_ver = re.search("-([0-9]+).(\d*).(\d*)", core_results_decoded)
         check = check_ver.group(0)
         output = (check[1:])
-        #print(output)
         # output = '2.14.1'
         verify(output)
+
     else:
         print('no appdynamics found')
 #2) take the output of the log4js file and parse it so it you can the csv
@@ -46,7 +46,7 @@ def verify(output):
             if row[4] == 'high':
                 test = row[1].split(",")
     # spliting all versions
-                for v_risk in test:
+                for v_risk in test:  
                     if v_risk == output: # passed in version from other funciton
                         print('at  high risk')
 
@@ -76,7 +76,7 @@ def verify(output):
 # 2) make more modular - both the grabbing of the log4j files and the checking aginst the list
 # 3) step 4 needs to be completed
 # 4) parts of the script needs to be changed to be run aginst another computer
-# you can call me at 206-794-2562 or message me on discord
+## you can call me at 206-794-2562 or message me on discord
 
 
 
