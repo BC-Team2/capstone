@@ -1,0 +1,5 @@
+[LocalRepo_AppDynamics]
+name=LocalRepo_AppDynamics
+enabled=1
+gpgcheck=0
+baseurl=http://centos-josh/local_repo
