@@ -36,8 +36,6 @@ def check(client):
 #2) take the output of the log4js file and parse it so it you can the csv
 #3) check the log4js to the csv file - this portion needs to check both sides and to use wild cards - such as 2.17.* is at risk if it was 2.17 but not 2.17.1
 def verify(output):
-    #debug text
-    print('entered verify')
     with open('log4j_issues.csv', 'r') as testfile:
         read = csv.reader(testfile, delimiter=',')
     # reading csv

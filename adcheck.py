@@ -25,6 +25,8 @@ parser.add_argument('-i', '--key', type=str, required=True,
                     help='The FULL path to the SSH private key for a user with sufficient privileges')
 # If '-c' is used, it will return true (user is running script in check ONLY mode)
 parser.add_argument('-c', '--check', action='store_true', help='The program to evaluate for vulnerability')
+parser.add_argument('-u', '--user', type=str, help='The user to create the ssh session as, if different than the '
+                                                   'currently logged in use')
 # Parse arguments
 args = parser.parse_args()
 
@@ -55,9 +57,25 @@ def get_targets():
         exit(2)
 
 
+def build_remediation_list(scan_list):
+    """Accepts the results of the vulnerability check as a list, parses out targets by status
+    and returns that list"""
+    remediation_list = []
+    failed_list = []
+    non_vulnerable_list = []
+    for i in scan_list:
+        if 'Failed' in i[1] or 'Error' in i[1]:
+            failed_list.append(i)
+        elif i[2] == 'Version VULNERABLE':
+            remediation_list.append(i[0])
+        else:
+            non_vulnerable_list.append(i)
+    return remediation_list, non_vulnerable_list, failed_list
+
+
 if __name__ == '__main__':
     """Main function (call other functions from here)"""
-    # If check only is on, says so
+    # If check only is on, says so. We're not using this? Remove.
     if args.check:
         print("Running in check ONLY mode\n")
         logger.info(f'Evaluating for  {QUERY_PROG}  greater than or equal to version {NON_VULNERABLE_VERSION}')
@@ -70,11 +88,11 @@ if __name__ == '__main__':
     # 5 second safety net before we touch any systems
     print('Waiting 5 seconds before connecting to systems. Ctrl+c to break')
     time.sleep(5)
-    pssh_session.get_vulnerability_status_ssh(target_list, args.key)
-    # Debug code - prints the list of clients
-    # for i in target_list:
-    #     print(i)
-    ###
-    # TODO: The 'get version' code is probably going to change once we run multiple machines
-    # version = pssh_session.query_targets(QUERY_PROG)  # Get hostname/version for a computer
-    # print(version)  # Debug print
+    # Check initial list of targets for vulnerability
+    scan_results = pssh_session.get_vulnerability_status_ssh(target_list, args.key)
+    # Create a list of targets that are vulnerable and need updating
+    remediation_list = build_remediation_list(scan_results)
+
+    # TODO: Finish remediation functions
+    # TODO: Run a second scan on vulnerable targets to make sure the updates happened appropriately
+    # TODO: Output first vuln scan to csv. Then final results with all targets to CSV
