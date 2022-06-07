@@ -91,8 +91,16 @@ if __name__ == '__main__':
     # Check initial list of targets for vulnerability
     scan_results = pssh_session.get_vulnerability_status_ssh(target_list, args.key)
     # Create a list of targets that are vulnerable and need updating
-    remediation_list = build_remediation_list(scan_results)
+    remediation_list, non_vulnerable_list, failed_list = build_remediation_list(scan_results)
+    # TODO: Probably want to print out a list of vulnerable systems in tabular format before starting remediation
+    print('\n---Starting remediation process---\n')
+    # 5 second safety net before we touch any systems
+    print('Waiting 5 seconds before connecting to systems. Ctrl+c to break')
+    time.sleep(5)
+    pssh_session.remediate_targets(remediation_list, args.key)
 
-    # TODO: Finish remediation functions
+    # TODO: Finish/test remediation functions
     # TODO: Run a second scan on vulnerable targets to make sure the updates happened appropriately
     # TODO: Output first vuln scan to csv. Then final results with all targets to CSV
+    # TODO: There needs to be an optional switch for password on program startup that will pass to paramiko.
+    #  Passwords for key connections (I believe) are used for the key password

@@ -21,6 +21,7 @@ def create_session(target, key):
         if adcheck.args.user:  # If a user (-u) was passed, use that. Otherwise, use the current user
             adcheck.logger.info(f'Connecting as {adcheck.args.user}')
             client.connect(target, username=adcheck.args.user, key_filename=key)
+            print("Connected to " + target)
         else:
             client.connect(target, key_filename=key)
     # Catch various errors and try to provide context when possible
@@ -48,8 +49,8 @@ def create_session(target, key):
 
 def evaluate_version(tar, client):
     """Get information about app dynamics on a client. Put findings in a list"""
-    print("Connected to " + tar + ", running checks")
     # Check installed RPMs. Grep for the program we're looking for
+    print('Evaluating version...')
     stdin, stdout, stderr = client.exec_command('rpm -qa | grep ' + adcheck.QUERY_PROG)
     if stdout.channel.recv_exit_status() == 0:
         rpm_output = stdout.read().decode("utf8")
@@ -61,7 +62,7 @@ def evaluate_version(tar, client):
             app_ver_re = re.search("appdynamics-machine-agent-(.*).x", rpm_output)
             app_version = app_ver_re.group(1)
             # Call a function to evaluate whether this version is vulnerable
-            vuln_status = eval_version(app_version)
+            vuln_status = check_version_vulnerability(app_version)
             adcheck.logger.info(f'{tar} is {vuln_status}')
             # Add these results to the master results list.
             machine_status.append([tar, app_version, vuln_status])
@@ -116,7 +117,7 @@ def pass_test(connection):
     stderr.close()
 
 
-def eval_version(ver):
+def check_version_vulnerability(ver):
     """Function that breaks down version numbers, which are separated by periods. Evaluates to three places"""
     check_ver = re.search("(\d*).(\d*).(\d*).(\d*)", ver)
     nonvuln_split = adcheck.NON_VULNERABLE_VERSION.split('.')
@@ -138,11 +139,24 @@ def eval_version(ver):
 def remediate_targets(targets, key):
     # WIP
     """Connect back to clients that are running a vulnerable version of app dynamics and update them"""
-    machine_status = []
+    # Clear the machine status list since the first run is already parsed out into more specific status lists
+    machine_status.clear()
     for t in targets:
         for tar in t:
             client = create_session(tar, key)
             if client:
-                'Insert yum and systemctl commands from evaluate_version here to update the target'
-
-    # return machine_status
+                # Probably not using stdout for the update, but we're taking it anyway for logs
+                # Update appdynamics, restart service
+                stdin, stdout, stderr = client.exec_command('sudo yum -y ' + adcheck.QUERY_PROG)
+                adcheck.logger.info(f'Yum install status: {stdout,stderr}')
+                stdin, stdout, stderr = client.exec_command('sudo systemctl restart ' + adcheck.QUERY_PROG)
+                adcheck.logger.info(f'Restarting appdynamics: {stdout, stderr}')
+                # Check version again. If this still gives us a vuln version, manual steps are needed by user.
+                evaluate_version(tar, client)
+            else:
+                adcheck.logger.error(f'Could not connect to {tar}. Skipping update')
+            # After all evaluation tasks are done, close out the connection. If we couldn't connect, and ended up with
+            # a nonetype for client, we skip this and go to the next client. This shouldn't happen at this phase.
+            if client:
+                client.close()
+    return machine_status
