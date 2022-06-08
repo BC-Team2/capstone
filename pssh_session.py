@@ -11,7 +11,7 @@ machine_status = []
 
 
 def create_session(target, key):
-    """Establish a ssh connection with a target. Return the connection object"""
+    """Establish an ssh connection with a target. Return the connection object"""
     print('----------------------')
     print('Trying ' + target)
     client = SSHClient()
@@ -28,19 +28,19 @@ def create_session(target, key):
     except paramiko.SSHException as e:
         # If we can't connect, put results in the list and log.
         adcheck.logger.error(f'Failed to connect to {target} --- {e}')
-        machine_status.append([target, 'Connection failed'])
+        machine_status.append([target, 'Connection failed', 'Unknown'])
         print(e)
         print('There was an error connecting to the server (SSH KEY). Exiting')
         return
     except BlockingIOError as b:
         adcheck.logger.error(f'{target} is not reachable --- {b}')
-        machine_status.append([target, 'Connection failed'])
+        machine_status.append([target, 'Connection failed', 'Unknown'])
         print(f'It looks like {target} is not reachable. Skipping')
         return
     except:
         adcheck.logger.error(f'{target} had some other type of error. Consider seeing if this user is valid --- ')
-        machine_status.append([target, 'Connection failed'])
-        print(f'It looks like {target} cannot be connected to. If the provided user valid? Skipping')
+        machine_status.append([target, 'Connection failed', 'Unknown'])
+        print(f'It looks like {target} cannot be connected to. Is the provided user valid? Skipping')
         return
     # If we connected successfully, proceed to evaluate the program version and report findings via console
     adcheck.logger.info(f'Connected to {target}')
@@ -63,7 +63,7 @@ def evaluate_version(tar, client):
             app_version = app_ver_re.group(1)
             # Call a function to evaluate whether this version is vulnerable
             vuln_status = check_version_vulnerability(app_version)
-            adcheck.logger.info(f'{tar} is {vuln_status}')
+            adcheck.logger.info(f'Vulnerability result: {vuln_status} for {tar}')
             # Add these results to the master results list.
             machine_status.append([tar, app_version, vuln_status])
             print(vuln_status)
@@ -73,9 +73,9 @@ def evaluate_version(tar, client):
             print('Client not found')
     # If grepping the package fails, note that happened and move on. Likely not installed.
     elif stdout.channel.recv_exit_status() == 1:
-        adcheck.logger.error(f'Error code 1 received when searching for app dynamics on {tar}. Is it '
-                             f'installed here? {stderr.read().decode("utf8")}')
-        machine_status.append([tar, 'Failed to process app version. Is it installed?'])
+        adcheck.logger.warning(f'Error code 1 received when searching for app dynamics on {tar}. Is it '
+                               f'installed here? {stderr.read().decode("utf8")}')
+        machine_status.append([tar, 'Failed to process app version. Is it installed?', 'Unknown'])
         print(f'App Dynamics not found. Is it installed here? {stderr.read().decode("utf8")}')
     else:
         adcheck.logger.error(f'Nonspecific error encountered on {tar} {stderr.read().decode("utf8")}')
@@ -96,19 +96,20 @@ def get_vulnerability_status_ssh(targets, key):
         for tar in t:
             client = create_session(tar, key)
             if client:
+                evaluate_version(tar, client)
                 # Call find.py's functions
                 log4j_vuln_status = find.check(client)
-                evaluate_version(tar, client)
 
             # After all evaluation tasks are done, close out the connection. If we couldn't connect, and ended up with
             # a nonetype for client, we skip this and go to the next client.
             if client:
                 client.close()
+                adcheck.logger.info(f'Connection closed to {tar}')
     return machine_status
 
 
 def pass_test(connection):
-    """This is a test function that accepts a ssh client and prints out pwd"""
+    """This is a test function that accepts an ssh client and prints the pwd command"""
     print('running pass test')
     stdin, stdout, stderr = connection.exec_command('pwd')
     print(stdout.read().decode("utf8"))
@@ -137,26 +138,40 @@ def check_version_vulnerability(ver):
 
 
 def remediate_targets(targets, key):
-    # WIP
     """Connect back to clients that are running a vulnerable version of app dynamics and update them"""
     # Clear the machine status list since the first run is already parsed out into more specific status lists
     machine_status.clear()
-    for t in targets:
-        for tar in t:
-            client = create_session(tar, key)
-            if client:
-                # Probably not using stdout for the update, but we're taking it anyway for logs
-                # Update appdynamics, restart service
-                stdin, stdout, stderr = client.exec_command('sudo yum -y ' + adcheck.QUERY_PROG)
-                adcheck.logger.info(f'Yum install status: {stdout,stderr}')
-                stdin, stdout, stderr = client.exec_command('sudo systemctl restart ' + adcheck.QUERY_PROG)
-                adcheck.logger.info(f'Restarting appdynamics: {stdout, stderr}')
-                # Check version again. If this still gives us a vuln version, manual steps are needed by user.
-                evaluate_version(tar, client)
+    for tar in targets:
+        client = create_session(tar, key)
+        if client:
+            # Update appdynamics, restart service
+            print('Starting appdynamics update process - Updating through yum ')
+            adcheck.logger.info(f'Starting appdynamics update process for {tar}')
+            stdin, stdout, stderr = client.exec_command('sudo yum install -y ' + adcheck.QUERY_PROG)
+            exit_status = stdout.channel.recv_exit_status()
+            if exit_status == 0:
+                print('Update completed')
+                adcheck.logger.info(f'Yum install status: {stdout.read().decode("utf8"), stderr.read().decode("utf8")}')
             else:
-                adcheck.logger.error(f'Could not connect to {tar}. Skipping update')
-            # After all evaluation tasks are done, close out the connection. If we couldn't connect, and ended up with
-            # a nonetype for client, we skip this and go to the next client. This shouldn't happen at this phase.
-            if client:
-                client.close()
+                print(f'Error installing appdynamics. Please check log: {exit_status} {stderr.read().decode("utf8")}')
+                adcheck.logger.error(f'Yum update status: {stdout.read().decode("utf8"), stderr.read().decode("utf8")}')
+            print('Restarting appdynamics service')
+            adcheck.logger.info(f'Restarting appdynamics service on {tar}')
+            stdin, stdout, stderr = client.exec_command('sudo systemctl restart ' + adcheck.QUERY_PROG)
+            exit_status = stdout.channel.recv_exit_status()
+            if exit_status == 0:
+                print('Service restarted')
+                adcheck.logger.info(f'Service restarted on {tar}')
+            else:
+                print(f'Error restarting service, {exit_status} {stderr.read().decode("utf8")}')
+                adcheck.logger.error(f'Error restarting appdynamics service on {tar} {stderr.read().decode("utf8")}')
+            # Check version again. If this still gives us a vuln version, manual steps are needed by user.
+            # This is essentially any clients that failed to update
+            evaluate_version(tar, client)
+        else:
+            adcheck.logger.error(f'Could not connect to {tar}. Skipping update')
+        # After all evaluation tasks are done, close out the connection. If we couldn't connect, and ended up with
+        # a nonetype for client, we skip this and go to the next client. This shouldn't happen at this phase.
+        if client:
+            client.close()
     return machine_status
