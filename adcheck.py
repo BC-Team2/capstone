@@ -164,8 +164,8 @@ if __name__ == '__main__':
     # Attempt to update systems and return the results
     updated_list = pssh_session.remediate_targets(remediation_list, args.key)
     # Print out results for user
-    print_final_results(non_vulnerable_list, failed_list, updated_list, 'final_results.csv')
+    print_final_results(non_vulnerable_list, failed_list, updated_list)
     # Export results to CSV file
-    export_to_csv(non_vulnerable_list, failed_list, updated_list)
+    export_to_csv(non_vulnerable_list, failed_list, updated_list, 'final_results.csv')
 
     # TODO: Push password auth to connection creation function
