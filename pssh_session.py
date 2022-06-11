@@ -1,29 +1,27 @@
+#!/usr/bin/env python3
+"""Library for connecting to clients using paramiko and evaluating app dynamics for log4j vulnerabilities"""
+# Lead architect and developer - Josh Parmely https://www.linkedin.com/in/jparmely/
 import re
-import subprocess
-import sys
 import paramiko
 from paramiko import SSHClient, AutoAddPolicy
 import adcheck
-from adcheck import QUERY_PROG
 import find
 
 machine_status = []
 
 
-def create_session(target, key):
+def create_session(target, key, params):
     """Establish an ssh connection with a target. Return the connection object"""
     print('----------------------')
     print('Trying ' + target)
+    # For debug - will show the params passed to client.connect after 'target'.
+    # WARNING: Will show password in plaintext.
+    # Create a new SSHClient object
     client = SSHClient()
     client.set_missing_host_key_policy(AutoAddPolicy)
-    try:  # Connect to clients
+    try:  # Connect to clients using the current target, and a dict containing arguments for the SSH session
         adcheck.logger.info(f'Trying to connect to {target}')
-        if adcheck.args.user:  # If a user (-u) was passed, use that. Otherwise, use the current user
-            adcheck.logger.info(f'Connecting as {adcheck.args.user}')
-            client.connect(target, username=adcheck.args.user, key_filename=key)
-            print("Connected to " + target)
-        else:
-            client.connect(target, key_filename=key)
+        client.connect(target, **params)
     # Catch various errors and try to provide context when possible
     except paramiko.SSHException as e:
         # If we can't connect, put results in the list and log.
@@ -39,7 +37,7 @@ def create_session(target, key):
         return
     except:
         adcheck.logger.error(f'{target} had some other type of error. Consider seeing if this user is valid --- ')
-        machine_status.append([target, 'Connection failed', 'Unknown'])
+        machine_status.append([target, 'Connection Failed', 'Unknown'])
         print(f'It looks like {target} cannot be connected to. Is the provided user valid? Skipping')
         return
     # If we connected successfully, proceed to evaluate the program version and report findings via console
@@ -58,6 +56,8 @@ def evaluate_version(tar, client):
         if len(rpm_output) > 0:
             adcheck.logger.info(f'For {tar} found {rpm_output}')
             print('Found: ' + rpm_output)
+            # Call find.py's functions to check log4j version used by appdyn to verify findings
+            log4j_vuln_status = find.check_log4jcore(client)
             # Regex to get the version number from the package listing
             app_ver_re = re.search("appdynamics-machine-agent-(.*).x", rpm_output)
             app_version = app_ver_re.group(1)
@@ -65,7 +65,7 @@ def evaluate_version(tar, client):
             vuln_status = check_version_vulnerability(app_version)
             adcheck.logger.info(f'Vulnerability result: {vuln_status} for {tar}')
             # Add these results to the master results list.
-            machine_status.append([tar, app_version, vuln_status])
+            machine_status.append([tar, app_version, vuln_status, log4j_vuln_status])
             print(vuln_status)
         else:
             adcheck.logger.error(f'Client not found on {tar}')
@@ -86,7 +86,7 @@ def evaluate_version(tar, client):
     stderr.close()
 
 
-def get_vulnerability_status_ssh(targets, key):
+def get_vulnerability_status_ssh(targets, key, params):
     """Connect to a list of remote machines via ssh. Parse out the version number of the App Dynamics machine client
     and determine whether it is vulnerable per the company's documentation. Provide output to console and logging.
     Return the completed list with vuln status."""
@@ -94,11 +94,9 @@ def get_vulnerability_status_ssh(targets, key):
     # Nested loop because we end up with a list of lists for this function
     for t in targets:
         for tar in t:
-            client = create_session(tar, key)
+            client = create_session(tar, key, params)
             if client:
                 evaluate_version(tar, client)
-                # Call find.py's functions
-                log4j_vuln_status = find.check(client)
 
             # After all evaluation tasks are done, close out the connection. If we couldn't connect, and ended up with
             # a nonetype for client, we skip this and go to the next client.
@@ -137,12 +135,12 @@ def check_version_vulnerability(ver):
         return 'Version VULNERABLE'
 
 
-def remediate_targets(targets, key):
+def remediate_targets(targets, key, params):
     """Connect back to clients that are running a vulnerable version of app dynamics and update them"""
     # Clear the machine status list since the first run is already parsed out into more specific status lists
     machine_status.clear()
     for tar in targets:
-        client = create_session(tar, key)
+        client = create_session(tar, key, params)
         if client:
             # Update appdynamics, restart service
             print('Starting appdynamics update process - Updating through yum ')

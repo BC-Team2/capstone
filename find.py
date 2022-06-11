@@ -1,109 +1,41 @@
 #! /usr/bin/python3
-#jschump
+# jschump
 import subprocess, re, csv
-import paramiko
 
+# Default path for appdynamics. Change this if your location is different.
 APP_DYN_PATH = '/opt/appdynamics/'
 
 
-#1) come up with a way to find if the machine is running appdynamis, check services then location. If neither show up end script
-def check(client):
+def check_log4jcore(client):
+    """Check for the presence of the log4j-core file in the appdynamics directory.
+    Parse out the version number and pass the version number to a version lookup function"""
     lscheck1 = stdin, stdout, stderr = client.exec_command('ls /opt/appdynamics/machine-agent/')
     lscheck2 = stdout.read().decode('utf8')
     # TODO: Error checking for abnormal ls results
-    # if lscheck1.returncode == 0:
-    #     find_core = subprocess.run(['find', '/opt/', '-name', 'log4j-core*'], stdout=subprocess.PIPE).stdout.splitlines()
+
     core_results = stdin, stdout, stderr = client.exec_command('find ' + APP_DYN_PATH + ' -name "log4j-core*"')
     core_results_decoded = stdout.read().decode('utf8')
-    #print(type(lscheck2))
-    #print(lscheck2)
-    #print(type(core_results_decoded))
-    #print(core_results_decoded)
-
-    #print(find_core)
-        # find_api = subprocess.run(['find', '/opt/', '-name', 'log4j-*'], stdout=subprocess.PIPE).stdout.splitlines()
-    #print(type(core_results_decoded))
 
     if re.search("-([0-9]+).(\d*).(\d*)", core_results_decoded):
         check_ver = re.search("-([0-9]+).(\d*).(\d*)", core_results_decoded)
         check = check_ver.group(0)
         output = (check[1:])
-        # output = '2.14.1'
-        verify(output)
+        evaluate_log4jcore(output)
 
-    else:
-        print('no appdynamics found')
-#2) take the output of the log4js file and parse it so it you can the csv
-#3) check the log4js to the csv file - this portion needs to check both sides and to use wild cards - such as 2.17.* is at risk if it was 2.17 but not 2.17.1
-def verify(output):
+
+def evaluate_log4jcore(output):
+    """Read in a CSV of CVSS ratings for log4j. Find which level of vulnerability the version in our instance has"""
     with open('log4j_issues.csv', 'r') as testfile:
         read = csv.reader(testfile, delimiter=',')
-    # reading csv
+        # For each row (CVE) in our CVSS data, compare it to the version on this client and print out the results
         for row in read:
-    # checking if v_level is high
             if row[4] == 'high':
                 test = row[1].split(",")
-    # spliting all versions
-                for v_risk in test:  
-                    if v_risk == output: # passed in version from other funciton
-                        print('at  high risk')
-
-    # if statement to check if grabed data from computer matches at rick
+                for v_risk in test:
+                    if v_risk == output:
+                        print('CVSS Rating: HIGH')
             elif row[4] == 'medium':
                 test = row[1].split(",")
-    # spliting all versions
                 for v_risk in test:
-                    if v_risk == output:  # passed in version from other funciton
-                        print('at medium risk')
-        #else:
- #test = row[1].split(",")
-            # spliting all versions
-        #    for v_risk in test:
-        #        if v_risk == '9':  # passed in version from other funciton
-        #            print('at risk')
-        #        else:
-        #            print("no issues found")
-# check()
-
-#4) if there is a error found you have to notify the user running the script and to append to a csv the name of the server and the log4j error they have/what version they need to upgrade to
-
-
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# THINGS TO WORK ON
-# 1) clean up tabbing/spacing - this was caused by vim
-# 2) make more modular - both the grabbing of the log4j files and the checking aginst the list
-# 3) step 4 needs to be completed
-# 4) parts of the script needs to be changed to be run aginst another computer
-## you can call me at 206-794-2562 or message me on discord
-
-
-
-
-#import subprocess
-
-#ls = "ls"
-
-#lscheck = subprocess.Popen([ls, '/opt/appdynamics/machine-agent/'], capture_output=True)
-
-
-#lscheck = subprocess.run([ls, '/opt/appdynamics/machine-agent/'])
-
-#print(lscheck)
-#if lscheck.returncode == 0:
-#    print('yes')
-#else:
-#    print('bad')
-
-#find = "find"
-
-#finder = subprocess.Popen([find, '
-
-#VSC Test Change 
-
-#1) come up with a way to find if the machine is running appdynamis, check services then location. If neither show up end script
-
-#2) take the output of the log4js file and parse it so it you can the csv
-
-#3) check the log4js to the csv file - this portion needs to check both sides and to use wild cards - such as 2.17.* is at risk if it was 2.17 but not 2.17.1
-
-#4) if there is a error found you have to notify the user running the script and to append to a csv the name of the server and the log4j error they have/what version they need to upgrade to                                                                                                                                                                                               
+                    if v_risk == output:
+                        print('CVSS Rating: Medium')
