@@ -5,7 +5,7 @@ import json
 
 
 # Add your personal API key here
-personalApiKey = '55aef6368413598bd41d33e6cb1557ff'
+personalApiKey = ''
 #
 # # Set HTTP Header
 userAgent = 'VulDB API Advanced Python Demo Agent'

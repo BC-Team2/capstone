@@ -162,7 +162,7 @@ def build_params():
 def banner():
     """Displays the opening banner for the program"""
     print('*' * 20)
-    print('Welcome to ADCheck - An program to evaluate App Dynamics installs for log4j vulnerabilities.\n')
+    print('Welcome to ADCheck - A program to evaluate App Dynamics installs for log4j vulnerabilities.\n')
 
 
 if __name__ == '__main__':
