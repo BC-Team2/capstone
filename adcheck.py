@@ -55,7 +55,9 @@ def get_targets():
         with open(args.targets, 'r') as infile:
             csvin = csv.reader(infile, delimiter=',')
             for line in csvin:
-                tlist.append(line)
+                # Strip out the white space for each line in the CSV to make sure it remains a valid IP
+                trim = (field.strip() for field in line)
+                tlist.append(trim)
         print("Loaded targets from " + args.targets)
         logger.info(f'Targets loaded from {args.targets}')
         return tlist
@@ -82,7 +84,7 @@ def build_remediation_list(scan_list):
     logger.info('Remediation process starting')
     # Finds which items are vulnerable, which had errors, and the rest (non-vulnerable)
     for i in scan_list:
-        if 'Failed' in i[1] or 'Error' in i[1]:
+        if 'Failed' in i[1] or 'Error' in i[1] or 'Connection failed' in i[1]:
             failed_list.append(i)
         elif i[2] == 'Version VULNERABLE':
             remediation_list.append(i[0])
