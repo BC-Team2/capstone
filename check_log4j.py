@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
+# Used to pull down a copy of log4j CVEs if needed, though a copy is already in the git repo
+# You will need to register for a vuldb API key and add it below
 import requests, csv
 import argparse
 import json
 
 
 # Add your personal API key here
-personalApiKey = '55aef6368413598bd41d33e6cb1557ff'
+personalApiKey = ''
 #
 # # Set HTTP Header
 userAgent = 'VulDB API Advanced Python Demo Agent'
